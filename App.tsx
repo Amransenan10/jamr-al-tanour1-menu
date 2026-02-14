@@ -134,7 +134,9 @@ const App: React.FC = () => {
 
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b px-4 py-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-orange-600 rounded-2xl flex items-center justify-center text-white shadow-lg cursor-pointer transition-transform active:scale-95" onClick={() => setShowDashboard(true)}>🔥</div>
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg cursor-pointer transition-transform active:scale-95 overflow-hidden border border-gray-100" onClick={() => setShowDashboard(true)}>
+            <img src="/logo.png" alt="جمر التنور" className="w-full h-full object-cover" />
+          </div>
           <div>
             <h1 className="text-xl font-bold text-gray-900 leading-none">جمر التنور</h1>
             <p className="text-[10px] text-orange-600 font-bold mt-1 flex items-center gap-1">

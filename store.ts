@@ -26,7 +26,7 @@ export const useCart = () => {
   const [customer, setCustomer] = useState<CustomerDetails>({
     name: '', phone: '', notes: '', locationUrl: '', branch: 'فرع السويدي الغربي'
   });
-  
+
   const [reviews, setReviews] = useState<Review[]>(INITIAL_REVIEWS);
   const [restaurantConfig, setRestaurantConfig] = useState<RestaurantConfig>({
     isOpen: true,
@@ -67,35 +67,35 @@ export const useCart = () => {
 
     setCart(prev => {
       let nextCart = [...prev];
-      
+
       sizesToProcess.forEach(size => {
         const sizePrice = size?.price || 0;
         const unitPrice = item.price + sizePrice + extrasPrice;
         const cartId = `${item.id}-${size?.id || 'default'}-${proteinType || 'none'}-${selectedExtras.map(e => e.id).sort().join(',')}-${notes}`;
-        
+
         const existingIndex = nextCart.findIndex(i => i.cartId === cartId);
-        
+
         if (existingIndex > -1) {
           const existing = nextCart[existingIndex];
           const newQty = existing.quantity + quantity;
-          nextCart[existingIndex] = { 
-            ...existing, 
-            quantity: newQty, 
-            totalPrice: newQty * unitPrice 
+          nextCart[existingIndex] = {
+            ...existing,
+            quantity: newQty,
+            totalPrice: newQty * unitPrice
           };
         } else {
           nextCart.push({
-            cartId, 
-            id: item.id, 
-            name: item.name, 
-            ingredients: item.ingredients, 
+            cartId,
+            id: item.id,
+            name: item.name,
+            ingredients: item.ingredients,
             notes,
-            basePrice: unitPrice, 
-            totalPrice: unitPrice * quantity, 
+            basePrice: unitPrice,
+            totalPrice: unitPrice * quantity,
             quantity,
-            selectedSize: size, 
-            selectedProtein: proteinType, 
-            selectedExtras: [...selectedExtras], 
+            selectedSize: size,
+            selectedProtein: proteinType,
+            selectedExtras: [...selectedExtras],
             image: item.image
           });
         }
@@ -105,17 +105,17 @@ export const useCart = () => {
   }, []);
 
   const removeFromCart = (cartId: string) => setCart(p => p.filter(i => i.cartId !== cartId));
-  
-  const updateQuantity = (cartId: string, delta: number) => setCart(p => p.map(i => 
+
+  const updateQuantity = (cartId: string, delta: number) => setCart(p => p.map(i =>
     i.cartId === cartId ? {
-      ...i, 
-      quantity: Math.max(1, i.quantity + delta), 
+      ...i,
+      quantity: Math.max(1, i.quantity + delta),
       totalPrice: Math.max(1, i.quantity + delta) * i.basePrice
     } : i
   ));
 
   const clearCart = () => setCart([]);
-  
+
   const totalAmount = useMemo(() => cart.reduce((sum, item) => sum + item.totalPrice, 0), [cart]);
 
   const addOrder = (payload: OrderPayload) => setOrders(prev => [payload, ...prev]);
@@ -153,13 +153,19 @@ export const useCart = () => {
     getAverageRating,
     selectedBranch,
     updateBranch,
-    // Fix: Removed the duplicate 'deliveryFee' property name from the object literal.
-    // The deliveryFee returned reflects the computed actualDeliveryFee which depends on the order type.
+    addMenuItem,
+    updateRestaurantConfig,
     deliveryFee: actualDeliveryFee,
     updateMenuItemPrice,
     toggleItemVisibility,
     deleteMenuItem,
-    addMenuItem,
-    updateRestaurantConfig
+    addReview: (review: Omit<Review, 'id' | 'date'>) => {
+      const newReview: Review = {
+        ...review,
+        id: Math.random().toString(36).substr(2, 9),
+        date: new Date().toISOString()
+      };
+      setReviews(prev => [newReview, ...prev]);
+    }
   };
 };

@@ -14,7 +14,7 @@ const App: React.FC = () => {
     menuItems, restaurantConfig, cart, orders, addOrder, addToCart, removeFromCart, updateQuantity,
     totalAmount, isCartOpen, setIsCartOpen, orderType, setOrderType, customer, setCustomer, clearCart,
     reviews, selectedBranch, updateBranch, deliveryFee, setDeliveryFee,
-    updateMenuItemPrice, toggleItemVisibility, deleteMenuItem, addMenuItem, updateRestaurantConfig
+    updateMenuItemPrice, toggleItemVisibility, deleteMenuItem, addMenuItem, updateRestaurantConfig, addReview
   } = useCart();
 
   const [activeCategory, setActiveCategory] = useState(CATEGORIES[0].id);
@@ -236,7 +236,7 @@ const App: React.FC = () => {
             addToCart(selectedProduct, sizes, extras, qty, notes, protein);
             showToast(`✅ تم إضافة ${selectedProduct.name} للسلة`);
           }}
-          onAddReview={() => { }}
+          onAddReview={addReview}
         />
       )}
 

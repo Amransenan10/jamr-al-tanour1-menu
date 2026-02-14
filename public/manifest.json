@@ -1,0 +1,22 @@
+{
+    "name": "منيو جمر التنور",
+    "short_name": "جمر التنور",
+    "description": "قائمة الطعام الرقمية لمطعم جمر التنور",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ea580c",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/logo.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "/logo.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ]
+}

@@ -33,13 +33,14 @@ export interface MenuItem {
   extras?: Extra[];
   rating?: number;
   reviewCount?: number;
-  isVisible?: boolean; // خاصية جديدة للتحكم في الظهور
+  is_available?: boolean;
 }
 
 export interface Category {
   id: string;
   name: string;
   icon: string;
+  order_index?: number;
 }
 
 export interface CartItem {

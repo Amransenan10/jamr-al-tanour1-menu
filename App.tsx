@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
-import { CATEGORIES } from './data';
 import { useCart } from './store';
 import { CartIcon, TrashIcon, PlusIcon, MinusIcon, CloseIcon, SunIcon, MoonIcon } from './Icons';
 import ProductModal from './ProductModal';
@@ -11,13 +10,19 @@ import { MenuItem, OrderPayload } from './types';
 
 const App: React.FC = () => {
   const {
-    menuItems, restaurantConfig, cart, orders, addOrder, addToCart, removeFromCart, updateQuantity,
+    menuItems, categories, isLoading, restaurantConfig, cart, orders, addOrder, addToCart, removeFromCart, updateQuantity,
     totalAmount, isCartOpen, setIsCartOpen, orderType, setOrderType, customer, setCustomer, clearCart,
     reviews, selectedBranch, updateBranch, deliveryFee, setDeliveryFee,
     updateMenuItemPrice, toggleItemVisibility, deleteMenuItem, addMenuItem, updateRestaurantConfig, addReview
   } = useCart();
 
-  const [activeCategory, setActiveCategory] = useState(CATEGORIES[0].id);
+  const [activeCategory, setActiveCategory] = useState<string>('');
+
+  useEffect(() => {
+    if (categories.length > 0 && !activeCategory) {
+      setActiveCategory(categories[0].id);
+    }
+  }, [categories, activeCategory]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -47,7 +52,7 @@ const App: React.FC = () => {
 
   const filteredItems = menuItems.filter(item =>
     item.categoryId === activeCategory &&
-    item.isVisible !== false &&
+    item.is_available !== false &&
     (item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchQuery.toLowerCase()))
   );
@@ -195,13 +200,20 @@ const App: React.FC = () => {
         </div>
 
         <div className="flex overflow-x-auto gap-3 no-scrollbar py-2">
-          {CATEGORIES.map(c => (
+          {categories.map(c => (
             <button key={c.id} onClick={() => setActiveCategory(c.id)} className={`px-5 py-3 rounded-2xl whitespace-nowrap font-bold text-sm transition-all border-2 ${activeCategory === c.id ? 'bg-orange-600 border-orange-600 text-white shadow-lg scale-105' : 'bg-white dark:bg-charcoal-light border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-100 dark:hover:border-gray-600'}`}>{c.icon} {c.name}</button>
           ))}
         </div>
 
         <div className="grid gap-3 grid-cols-2 sm:grid-cols-2">
-          {filteredItems.map(item => (
+          {isLoading ? (
+            <div className="col-span-2 py-20 flex flex-col items-center justify-center space-y-4">
+              <div className="w-10 h-10 border-4 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-gray-400 font-bold">جاري تحميل المنيو...</p>
+            </div>
+          ) : filteredItems.length === 0 ? (
+            <div className="col-span-2 py-20 text-center text-gray-400">لا يوجد أصناف متوفرة في هذا القسم حالياً</div>
+          ) : filteredItems.map(item => (
             <div key={item.id} className="bg-white dark:bg-charcoal-light p-3 rounded-3xl flex flex-col shadow-md hover:shadow-xl border border-transparent hover:border-orange-100 dark:hover:border-orange-900 transition-all duration-300 cursor-pointer group active:scale-[0.98]" onClick={() => setSelectedProduct(item)}>
               <div className="relative w-full aspect-square mb-3">
                 <ImageWithFallback src={item.image} className="w-full h-full rounded-2xl group-hover:scale-105 transition-transform shadow-sm object-cover" />

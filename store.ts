@@ -1,7 +1,7 @@
-
-import { useState, useCallback, useMemo } from 'react';
-import { CartItem, MenuItem, Size, Extra, CustomerDetails, OrderType, Review, OrderPayload, RestaurantConfig } from './types';
-import { INITIAL_REVIEWS, MENU_DATA } from './data';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { CartItem, MenuItem, Size, Extra, CustomerDetails, OrderType, Review, OrderPayload, RestaurantConfig, Category } from './types';
+import { INITIAL_REVIEWS } from './data';
+import { supabase } from './supabase';
 
 export const DEFAULT_WHATSAPP_TEMPLATE = `*طلب جديد: {customerName} | {branch}* 📍
 
@@ -16,7 +16,9 @@ export const DEFAULT_WHATSAPP_TEMPLATE = `*طلب جديد: {customerName} | {br
 *ملاحظات:* {customerNotes}`;
 
 export const useCart = () => {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(MENU_DATA.map(item => ({ ...item, isVisible: true })));
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<OrderPayload[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -38,13 +40,69 @@ export const useCart = () => {
     whatsappTemplate: DEFAULT_WHATSAPP_TEMPLATE
   });
 
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch categories
+      const { data: catData, error: catError } = await supabase
+        .from('categories')
+        .select('*')
+        .order('order_index', { ascending: true });
+
+      if (catError) throw catError;
+      setCategories(catData || []);
+
+      // Fetch menu items with options
+      const { data: itemData, error: itemError } = await supabase
+        .from('menu_items')
+        .select(`
+          *,
+          item_options (*)
+        `)
+        .eq('is_available', true);
+
+      if (itemError) throw itemError;
+
+      const formattedItems: MenuItem[] = (itemData || []).map((item: any) => ({
+        id: item.id,
+        categoryId: item.category_id,
+        name: item.name,
+        description: item.description || '',
+        ingredients: item.ingredients || '',
+        price: item.price,
+        image: item.image_url,
+        proteinTypes: item.protein_types || [],
+        sizes: item.item_options?.filter((o: any) => o.type === 'size').map((o: any) => ({ id: o.id, name: o.name, price: o.price })) || [],
+        extras: item.item_options?.filter((o: any) => o.type === 'extra').map((o: any) => ({ id: o.id, name: o.name, price: o.price })) || [],
+        is_available: item.is_available
+      }));
+
+      setMenuItems(formattedItems);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   // وظائف الإدارة
   const updateMenuItemPrice = (id: string, newPrice: number) => {
     setMenuItems(prev => prev.map(item => item.id === id ? { ...item, price: newPrice } : item));
   };
 
-  const toggleItemVisibility = (id: string) => {
-    setMenuItems(prev => prev.map(item => item.id === id ? { ...item, isVisible: !item.isVisible } : item));
+  const toggleItemVisibility = async (id: string, currentStatus: boolean) => {
+    const { error } = await supabase
+      .from('menu_items')
+      .update({ is_available: !currentStatus })
+      .eq('id', id);
+
+    if (!error) {
+      fetchData();
+    }
   };
 
   const deleteMenuItem = (id: string) => {
@@ -133,6 +191,8 @@ export const useCart = () => {
 
   return {
     menuItems,
+    categories,
+    isLoading,
     restaurantConfig,
     cart,
     orders,

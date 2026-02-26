@@ -9,7 +9,7 @@ interface DashboardProps {
   deleteMenuItem: (id: string) => void;
   addMenuItem: (item: MenuItem) => void;
   updateMenuItemPrice: (id: string, newPrice: number) => void;
-  toggleItemVisibility: (id: string) => void;
+  toggleItemVisibility: (id: string, currentStatus: boolean) => void;
   restaurantConfig: RestaurantConfig;
   updateRestaurantConfig: (config: RestaurantConfig) => void;
   reviews: Review[];
@@ -80,7 +80,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <input type="number" value={item.price} onChange={e => updateMenuItemPrice(item.id, Number(e.target.value))} className="w-16 p-2 border rounded-lg text-center font-black" />
-                  <button onClick={() => toggleItemVisibility(item.id)} className={`p-2 rounded-lg ${item.isVisible !== false ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>{item.isVisible !== false ? '👁️' : '🚫'}</button>
+                  <button onClick={() => toggleItemVisibility(item.id, item.is_available ?? true)} className={`p-2 rounded-lg ${item.is_available !== false ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>{item.is_available !== false ? '👁️' : '🚫'}</button>
                 </div>
               </div>
             ))}

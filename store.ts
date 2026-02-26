@@ -74,10 +74,20 @@ export const useCart = () => {
         proteinTypes: item.protein_types || [],
         sizes: item.item_options?.filter((o: any) => o.type === 'size').map((o: any) => ({ id: o.id, name: o.name, price: o.price })) || [],
         extras: item.item_options?.filter((o: any) => o.type === 'extra').map((o: any) => ({ id: o.id, name: o.name, price: o.price })) || [],
-        is_available: item.is_available
+        is_available: item.is_available,
+        lastUpdate: Date.now()
       }));
 
-      setMenuItems(formattedItems);
+      // Organize menu with displayIds
+      const organizedItems = catData.flatMap((category, catIndex) => {
+        const categoryItems = formattedItems.filter(item => item.categoryId === category.id);
+        return categoryItems.map((item, itemIndex) => ({
+          ...item,
+          displayId: `${catIndex + 1}.${itemIndex + 1}`
+        }));
+      });
+
+      setMenuItems(organizedItems);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {

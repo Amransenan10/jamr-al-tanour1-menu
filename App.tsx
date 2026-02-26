@@ -9,6 +9,18 @@ import ImageWithFallback from './ImageWithFallback';
 import { MenuItem, OrderPayload } from './types';
 
 const App: React.FC = () => {
+  // Cache busting logic
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const lastVersion = localStorage.getItem('menu_version');
+      if (lastVersion !== '2.0') {
+        localStorage.clear();
+        localStorage.setItem('menu_version', '2.0');
+        window.location.reload();
+      }
+    }
+  }, []);
+
   const {
     menuItems, categories, isLoading, restaurantConfig, cart, orders, addOrder, addToCart, removeFromCart, updateQuantity,
     totalAmount, isCartOpen, setIsCartOpen, orderType, setOrderType, customer, setCustomer, clearCart,
@@ -221,9 +233,12 @@ const App: React.FC = () => {
                   {item.price} ر.س
                 </div>
               </div>
-              <div className="flex-grow flex flex-col justify-between">
+              <div className="flex-grow flex-col justify-between">
                 <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white leading-tight text-xs sm:text-sm line-clamp-1">{item.name}</h3>
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-bold text-gray-900 dark:text-white leading-tight text-xs sm:text-sm line-clamp-1">{item.name}</h3>
+                    {item.displayId && <span className="text-[8px] text-gray-300 dark:text-gray-600 font-mono">#{item.displayId}</span>}
+                  </div>
                   {item.ingredients && <p className="text-[9px] text-gray-400 mt-1 line-clamp-1 italic font-medium">({item.ingredients})</p>}
                   <p className="text-[9px] text-gray-400 line-clamp-1 mt-1 leading-tight">{item.description}</p>
                 </div>

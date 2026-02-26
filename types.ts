@@ -34,6 +34,8 @@ export interface MenuItem {
   rating?: number;
   reviewCount?: number;
   is_available?: boolean;
+  displayId?: string;
+  lastUpdate?: number;
 }
 
 export interface Category {
